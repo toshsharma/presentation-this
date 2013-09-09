@@ -4,7 +4,7 @@ The presentation can be viewed at [http://toshsharma.github.io/presentation-this
 
 The _this_ keyword in JavaScript can get quite tricky, especially in event callbacks and setTimeout() or setInterval() handlers.
 
-This presentation discusses common usage patterns that lead to an incorrect context (i.e. an unexpected value of _this_), as well as provides recipes to code these patterns the right way.
+This presentation discusses common usage patterns that lead to an unexpected value of _this_, as well as provides recipes to code these patterns the right way.
 
 ### Outline
 
