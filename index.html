@@ -1,0 +1,1376 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Demystifying 'this'</title>
+
+		<meta name="description" content="Demystifying 'this'">
+		<meta name="author" content="Ashutosh Sharma">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/night.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+        <style>
+            .reveal h1 {
+                font-size: 3.5em;
+                margin-bottom: 0.5em;
+            }
+            .reveal pre code {
+                font-size: 1.4em;
+                padding: 0.8em;
+                margin-top: 1.5em;
+                line-height: 1.5em;
+            }
+            .reveal h3.fragment {
+                color: #f92;
+                margin-top: 0.75em;
+            }
+            .reveal h4.fragment {
+                color: #f92;
+                margin-top: 0.75em;
+            }
+            .highlight-tag {
+                /* color: #c90; */
+            }
+            .highlight-string {
+                color: #cc9393;
+            }
+            .reveal .button-click {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 5px 15px;
+                background-color: #f90;
+                color: #000;
+                cursor: pointer;
+                border-radius: 10px;
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+            .reveal .button-click:hover {
+                background-color: #c60;
+            }
+            .reveal .info-title {
+                text-align: left;
+                color: #f90;
+            }
+            .reveal .info {
+                background-color: #444;
+                margin-top: 0.5em;
+                margin-bottom: 15px;
+                font-size: 0.7em;
+                text-align: left;
+                padding: 0.3em;
+                padding-left: 1em;
+            }
+            .cover-slide body {
+                background-image: url(images/adobe.png);
+                background-position-x: 95%;
+                background-position-y: 0;
+                background-repeat: no-repeat;
+            }
+            .cover-slide .reveal h4 {
+                color: #ccc;
+                font-size: 0.8em;
+            }
+            .cover-slide .reveal h5 {
+                color: #aaa;
+                font-size: 0.7em;
+            }
+        </style>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<div class="slides">
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+				<section data-state="cover-slide">
+					<h1>Demystifying <em>this</em></h1>
+					<h3>
+						<small>by <a href="http://deceptiveweb.com">Ashutosh Sharma</a> / <a href="https://twitter.com/zorder">@zorder</a></small>
+					</h3>
+                    <h4>
+                        Senior Computer Scientist
+                    </h4>
+                    <h5>
+                        (Web Platform & Authoring)
+                    </h5>
+				</section>
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+				<section>
+					<h2>Quick Poll</h2>
+                    <p>
+                        <h4><a href="#1">Ever bitten by <i>this</i>?</a></h4>
+                        <ul>
+                            <li>Event callbacks</li>
+                            <li>setTimeout, setInterval handlers</li>
+                            <li><i>eval</i>ed code</li>
+                        </ul>
+
+                        <aside class="notes">
+                            - Have any of you ever found yourself with an unexpected value of 'this', e.g. when working with any of these?
+                        </aside>
+                    </p>
+
+				</section>
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+				<section>
+                    <section>
+                        <h2>What's this?</h2>
+                        <pre><code data-trim contenteditable>
+function handler() {
+    var val = this.value;
+    // ...
+}
+                        </code></pre>
+                        <ul>
+                            <li class="fragment roll-in"><i>this</i> refers to an <b>object</b></li>
+                            <li class="fragment roll-in">Its value in a function depends only on how the function is called</li>
+                        </ul>
+
+                        <aside class="notes">
+                            - The 'this' keyword has a somewhat different behavior in JavaScript, as compared to other languages such as C++ or Java. <br/>
+                            - The 'this' keyword refers to an object <br/>
+                            - And its value within a funciton depends only on how that function is called <br/>
+                            - It does not depend on how or where the function is defined (as is the case in C++ or Java)
+                        </aside>
+                    </section>
+
+                    <section>
+                        <h3><i>this</i> in object methods</h3>
+                        <pre><code data-trim contenteditable>
+var person = {
+    name: "John",
+    sayName: function() {
+        console.log(this.name);
+    }
+};
+
+person.sayName(); // "John"
+                        </code></pre>
+                        <aside class="notes">
+                            - Calling a function as a property of an object is the most common way to assign a value to 'this'. <br/>
+                            - Here, 'this' is set to the object the method is called on.
+                        </aside>
+                    </section>
+
+                    <section>
+                        <h3><i>this</i> in object methods</h3>
+                        <pre><code data-trim contenteditable>
+var person = {
+    sayName: function() {
+        console.log(this.name);
+    },
+    name: "John"
+};
+var ceo = { name: "Mark" };
+ceo.sayName = person.sayName;
+
+person.sayName(); // "John"
+ceo.sayName(); // "Mark"
+                        </code></pre>
+
+                        <aside class="notes">
+                             - Although both person.sayName and ceo.sayName refer to the same function, 'this' has different values and the function prints out different names based on which object it is invoked on.
+                        </aside>
+                    </section>
+
+
+
+                    <section>
+                        <h3>Attaching functions to objects</h3>
+                        <pre><code data-trim contenteditable>
+function independent() {
+    console.log(this.name);
+}
+
+var person = {
+    name: "John"
+};
+
+person.sayName = independent;
+person.sayName(); // "John"
+                        </code></pre>
+                        <aside class="notes">
+                            - Since the value of 'this' is not affected by how or where the function is defined, we can also easily attach an already-defined function to person.sayName. <br/>
+                            - This still results in the same behavior
+                        </aside>
+                    </section>
+
+                    <section>
+                        <h3>Methods on the prototype chain</h3>
+                        <pre><code data-trim contenteditable>
+var nameCaller = { 
+    sayName: function() { 
+        console.log(this.name); 
+    }
+};
+
+var person = Object.create(nameCaller);
+person.name = "John";
+person.sayName(); // "John"
+                        </code></pre>
+                        <aside class="notes">
+                            - The same thing holds true for methods defined somewhere on an object's prototype chain. <br/>
+                                - If a method is on an object's prototype chain, 'this' refers to the object the method was called on, as if the method was on the object itself.
+                        </aside>
+                    </section>
+
+                    <section>
+                        <h3>Getters and Setters</h3>
+                        <pre><code data-trim contenteditable>
+function fullName() { 
+    return this.firstName + " " + this.lastName;
+}
+
+var person = { firstName: "John", lastName: "Doe" };
+Object.defineProperty(person, "name", { get: fullName });
+
+console.log(person.name); // "John Doe"
+                        </code></pre>
+                        <aside class="notes">
+                            - The same thing also holds true when a function is invoked as a getter or setter. <br/>
+                                - i.e. 'this' still refers to the object for which the property is being fetched or set.
+                        </aside>
+                    </section>
+
+				</section>
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+                <section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h2>This is unexpected</h2>
+
+                        <aside class="notes">
+                            - Now, let's look at some cases with unexpected values of 'this'
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Function Calls</h3>
+                        <pre><code data-trim contenteditable>
+function func() {
+    console.log(this);
+}
+
+func(); // ?
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">&lt;window object&gt;</h3>
+                        <h6 class="fragment fade-in"><i>undefined</i> (strict mode)</h6>
+                        
+                        <aside class="notes">
+                            - When a function is not invoked via an object, 'this' refers to the (JavaScript runtime's) global object, which is the 'window' object in the case of browsers. <br/>
+                            - In JavaScript's strict mode, which is now supported by most modern browsers, 'this' is undefined in this context.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Extracted Object Methods</h3>
+                        <pre><code data-trim contenteditable>
+var person = {
+    sayName: function() {
+        console.log(this.firstName); // ?
+        console.log(this); // ?
+    },
+    firstName: "John"
+};
+
+var func = person.sayName;
+
+func();
+                        </code></pre>
+
+                        <h3 class="fragment fade-in"><i>undefined</i></h3>
+                        <h3 class="fragment fade-in">&lt;window object&gt;</h3>
+                        <h6 class="fragment fade-in"><i>undefined</i> (strict mode)</h6>
+
+                        <aside class="notes">
+                            - Since the value of 'this' doesn't depend on where a function is defined, but only on how it's invoked, this code is effectively the same as the previous one.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>setTimeout, setInterval</h3>
+                        <pre><code data-trim contenteditable>
+var person = { 
+    firstName: "John",
+    sayName: function() {
+        setTimeout(function() {
+            console.log(this.firstName); // ?
+            console.log(this); // ?
+        }, 1000);
+    }
+};
+
+person.sayName();
+                        </code></pre>
+
+                        <h3 class="fragment fade-in"><i>undefined</i></h3>
+                        <h3 class="fragment fade-in">&lt;window object&gt;</h3>
+                        <h6 class="fragment fade-in">&lt;window object&gt; (strict mode)</h6>
+                        
+                        <aside class="notes">
+                            - Within a setTimeout or setIntervall callback, 'this' always refers to the global window object, even in strict mode.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                </section>
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+                <section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h2>Event Handlers</h2>
+
+                        <aside class="notes">
+                            - 'this' can get tricky in DOM event handlers.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>&lt;<span class="highlight-tag">input</span> onclick="<span class="highlight-string">/* inline code */</span>"&gt;</h3>
+                        <pre><code data-trim contenteditable>
+&lt;input
+    type="button" 
+    onclick="this.value='changed';" 
+    value="click me" /&gt;
+                        </code></pre>
+
+                        <h3 class="fragment fade-in"><i>this</i> is the DOM element</h3>
+
+                        <aside class="notes">
+                            - With inline script handlers, 'this' refers to the DOM element itself.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>&lt;<span class="highlight-tag">input</span> onclick=<span class="highlight-string">"handler()"</span>&gt;</h3>
+                        <div style="text-align: left;">HTML:</div>
+                        <pre><code data-trim contenteditable>
+&lt;input type="button" onclick="handler()" /&gt;
+                        </code></pre>
+
+                        <br/>
+                        <div style="text-align: left;">JavaScript:</div>
+                        <pre><code data-trim contenteditable>
+function handler() {
+    console.log(this); // ?
+}
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">&lt;window object&gt;</h3>
+                        <h6 class="fragment fade-in"><i>undefined</i> (strict mode)</h6>
+
+                        <aside class="notes">
+                            - Although this looks similar to the previous piece of code, 'handler' here is called as a global function and hence 'this' refers to the global window object.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>&lt;<span class="highlight-tag">input</span> onclick=<span class="highlight-string">"handler(this)"</span>&gt;</h3>
+                        <div style="text-align: left;">HTML:</div>
+                        <pre><code data-trim contenteditable>
+&lt;input type="button" onclick="handler(this)" /&gt;
+                        </code></pre>
+
+                        <br/>
+                        <div style="text-align: left;">JavaScript:</div>
+                        <pre><code data-trim contenteditable>
+function handler(element) {
+    console.log(this); // ?
+    console.log(element); // ?
+}
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">&lt;window object&gt;</h3>
+                        <h3 class="fragment fade-in">&lt;input element&gt;</h3>
+
+                        <aside class="notes">
+                            - To obtain a reference to the DOM element in a global handler function, you can pass 'this' as an argument when invoking it from the onclick attribute. <br/>
+                            - You can also obtain a reference from the 'click' event object.
+                        </aside>
+
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>&lt;<span class="highlight-tag">input</span> onclick=<span class="highlight-string">"handler"</span>&gt;</h3>
+                        <div style="text-align: left;">HTML:</div>
+                        <pre><code data-trim contenteditable>
+&lt;input type="button" onclick="handler" /&gt;
+                        </code></pre>
+
+                        <br/>
+                        <div style="text-align: left;">JavaScript:</div>
+                        <pre><code data-trim contenteditable>
+function handler() {
+    console.log(this); // ?
+}
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">Nothing!</h3>
+                        <p class="fragment fade-in">
+                            <span class="fragment highlight-red">This is not a valid way to specify on* attributes</span>
+                        </p>
+
+                        <aside class="notes">
+                            - The on* attribute's value needs to be a valid script.
+                        </aside>
+
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>element.onclick = handler</h3>
+                        <div style="text-align: left;">HTML:</div>
+                        <pre><code data-trim contenteditable>
+&lt;input type="button" id="submit" /&gt;
+                        </code></pre>
+
+                        <br/>
+                        <div style="text-align: left;">JavaScript:</div>
+                        <pre><code data-trim contenteditable>
+function handler() {
+    console.log(this); // ?
+}
+
+var element = document.getElementById("submit");
+element.onclick = handler;
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">&lt;input element&gt;</h3>
+
+                        <aside class="notes">
+                            - When the onclick handler is set via JavaScript, 'this' refers to the DOM element.
+                        </aside>
+
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>element.addEventListener (...)</h3>
+                        <div style="text-align: left;">HTML:</div>
+                        <pre><code data-trim contenteditable>
+&lt;input type="button" id="submit" /&gt;
+                        </code></pre>
+
+                        <br/>
+                        <div style="text-align: left;">JavaScript:</div>
+                        <pre><code data-trim contenteditable>
+function handler() {
+    console.log(this); // ?
+}
+
+var element = document.getElementById("submit");
+element.addEventListener("click", handler);
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">&lt;input element&gt;</h3>
+
+                        <aside class="notes">
+                            - This is also true when the handler is set via addEventListener (which is the better way to attach handlers).
+                        </aside>
+
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                </section>
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+                <section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h2>jQuery and <i>this</i></h2>
+
+                        <aside class="notes">
+                            - Quick poll: Does anyone here use jQuery?
+                            - jQuery assigns useful values to 'this' when invoking callbacks
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h2>DOM event callbacks</h2>
+
+                        <pre><code data-trim contenteditable>
+$("p").click(function() {
+    this.style.backgroundColor = "yellow";
+
+    $(this).css("color", "blue");
+});
+                        </code></pre>
+
+                        <h3 class="fragment fade-in"><i>this</i> is the 'raw' DOM element</h3>
+
+                        <aside class="notes">
+                            - Although the click function is called on a jQuery object, 'this' refers to the actual DOM element inside the event callback, and not to the jQuery object.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h2>Functions on elements matched by jQuery Selectors</h2>
+
+                        <pre><code data-trim contenteditable>
+$("a").text(function() {
+    return this.getAttribute("href");
+});
+                        </code></pre>
+
+                        <h3 class="fragment fade-in"><i>this</i> is the 'raw' DOM element</h3>
+
+                        <aside class="notes">
+                            - This is also true for other functions that are called on DOM elements matched by jQuery's selectors.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h2>Iterate over elements matched by jQuery Selectors</h2>
+
+                        <pre><code data-trim contenteditable>
+$("a").each(function() {
+    console.log(this.getAttribute("href"));
+});
+                        </code></pre>
+
+                        <h3 class="fragment fade-in"><i>this</i> is the 'raw' DOM element</h3>
+
+                        <aside class="notes">
+                            - This is just a specific case of what's discussed in the previous slide
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h2>jQuery.each</h2>
+
+                        <pre><code data-trim contenteditable>
+var arr = [ "aa", "bb", "cc", "dd" ];
+$.each(arr, function() {
+    console.log(this);
+});
+                        </code></pre>
+
+                        <h3 class="fragment fade-in"><i>this</i> is an individual object in the array/collection</h3>
+
+                        <aside class="notes">
+                            - Here, 'this' conveniently refers to each of the individual objects being operated upon.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                </section>
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+                <section>
+                    <section>
+                        <h2>Constructors</h2>
+
+                        <aside class="notes">
+                            - Let's look at constructors
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3><i>this</i> in constructors</h3>
+
+                        <pre><code data-trim contenteditable>
+function Person() {
+    this.name = "John";
+}
+
+var p = new Person();
+console.log(p.name); // John
+                        </code></pre>
+
+                        <h3 class="fragment fade-in"><i>this</i> is the new object being constructed</h3>
+
+                        <aside class="notes">
+                            - When a function is used as a constructor (with the new keyword), its 'this' is bound to new object being constructed. <br/>
+                            - Also, 'this' is implicitly returned from constructors by default.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Return value from constructors</h3>
+
+                        <pre><code data-trim contenteditable>
+function Person() {
+    this.name = "John";
+
+    return { name: "Mark", age: 20 }
+}
+
+var p = new Person();
+console.log(p.name); // ?
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">Mark</h3>
+
+                        <aside class="notes">
+                            - However, some other *object* can be returned instead.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Return value from constructors</h3>
+
+                        <pre><code data-trim contenteditable>
+function Person() {
+    this.name = "John";
+
+    return 50; // :-o
+}
+
+var p = new Person();
+console.log(p.name); // ?
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">John</h3>
+
+                        <aside class="notes">
+                            - If the return value is not an object, then the 'this' object is returned.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                </section>
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+                <section>
+                    <section>
+                        <h2>Miscellaneous</h2>
+
+                        <aside class="notes">
+                            - Let's look at some more cases
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Nested Functions</h3>
+
+                        <pre><code data-trim contenteditable style="font-size: 1.3em;">
+var obj = {
+    name: "John",
+    outer: function() {
+        console.log("Outer: " + this.name); // ?
+        function inner() {
+            console.log("Inner: " + this); // ?
+        }
+        inner();
+    }
+}
+
+obj.outer();
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">Outer: John</h3>
+                        <h3 class="fragment fade-in">Inner: [object Window]</h3>
+                        <h6 class="fragment fade-in">Inner: <i>undefined</i> (strict mode)</h6>
+
+                        <aside class="notes">
+                            - When a function is nested inside another function, 'this' refers to the global window object. <br/>
+                            - In strict mode, 'this' is undefined in the inner function.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>eval</h3>
+
+                        <pre><code data-trim contenteditable>
+var obj = {
+    name: "John",
+    func: function() {
+             eval ("console.log(this)"); // ?
+        (1, eval) ("console.log(this)"); // ?
+    }
+}
+
+obj.func();
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">&lt;obj object&gt;</h3>
+                        <h3 class="fragment fade-in">&lt;window object&gt;</h3>
+                        <h6 class="fragment fade-in">&lt;window object&gt; (strict mode)</h6>
+
+                    <aside class="notes">
+                        - The eval function evaluates code in the scope of a caller, when called directly. <br/>
+                        - With an indirect eval, code evaluates in the global context, even in strict mode.
+                    </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Array: forEach, map, filter, every, some</h3>
+
+                        <pre><code data-trim contenteditable>
+var arr = [ "11", "22", "33", "44"];
+
+arr.forEach(function() {
+    console.log(this); // ?
+});
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">&lt;window object&gt;</h3>
+                        <h6 class="fragment fade-in"><i>undefined</i> (strict mode)</h6>
+
+                        <pre class="fragment fade-in"><code data-trim contenteditable>
+arr.forEach(function() {
+    console.log(this); // ?
+}, { name: "John" });
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">Object {name: "John"}</h3>
+
+                        <aside class="notes">
+                            - These functions are now natively implemented by many modern browsers. <br/>
+                            - Here, the behavior is different from that of jQuery.each.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                </section>
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+                <section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h2>Let's fix this</h2>
+
+                        <aside class="notes">
+                            - Let's see how we can get some control over the value of 'this'
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Inspecting the value of <i>this</i></h3>
+
+                        <pre><code data-trim contenteditable>
+var person = {
+    sayName: function() {
+        console.log(this.firstName); // <==
+    },
+    firstName: "John"
+};
+
+var func = person.sayName;
+                        </code></pre>
+
+                        <script src="inspect-this.js"></script>
+                        <span class="button-click" onclick="func()">func()</span>
+                        <span class="button-click" onclick="person.sayName()">person.sayName()</span>
+
+                        <aside class="notes">
+                        </aside>
+
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Inspecting the value of <i>this</i></h3>
+
+                        <div class="info-title" style="margin-top: 40px;">Chrome DevTools:</div>
+                        <div class="info">
+                            Sources &gt; Scope Variables &gt; Local &gt; this</h3> 
+                        </div>
+
+                        <div class="info-title">Firebug:</div>
+                        <div class="info">
+                            Script &gt; Watch &gt; this</h3> 
+                        </div>
+
+                        <div class="info-title">Firefox:</div>
+                        <div class="info">
+                            Debugger &gt; Function Scope &gt; this</h3> 
+                        </div>
+
+                        <div class="info-title">Opera:</div>
+                        <div class="info">
+                            Scripts &gt; State &gt; Inspection &gt; this</h3> 
+                        </div>
+
+                        <div class="info-title">Internet Explorer:</div>
+                        <div class="info">
+                            Script &gt; Locals &gt; this</h3> 
+                        </div>
+
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Creating a closure</h3>
+
+                        setTimeout
+                        <div style="text-align: left;">Original code:</div>
+                        <pre><code data-trim contenteditable>
+var person = { 
+    firstName: "John",
+    sayName: function() {
+        setTimeout(function() {
+            console.log(this.firstName); // undefined
+        }, 1000);
+    }
+};
+
+person.sayName();
+                        </code></pre>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section data-transition="none">
+                        <h3>Creating a closure</h3>
+
+                        setTimeout
+                        <div style="text-align: left;">Fixed code:</div>
+                        <pre><code data-trim contenteditable>
+var person = { 
+    firstName: "John",
+    sayName: function() {
+        var self = this; // &lt==
+        setTimeout(function() {
+            console.log(self.firstName); // ?
+        }, 1000);
+    }
+};
+
+person.sayName();
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">John</h3>
+
+                        <aside class="notes">
+                            - Let's first look at workarounds for some of the cases that we saw earlier.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Creating a closure</h3>
+
+                        Nested function
+                        <div style="text-align: left;">Original code:</div>
+                        <pre><code data-trim contenteditable>
+var obj = {
+    age: 20,
+    outer: function() {
+        function inner() {
+            console.log(this.age); // undefined
+        }
+        inner();
+    }
+}
+
+obj.outer();
+                        </code></pre>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section data-transition="none">
+                        <h3>Creating a closure</h3>
+
+                        Nested function
+                        <div style="text-align: left;">Fixed code:</div>
+                        <pre><code data-trim contenteditable>
+var obj = {
+    age: 20,
+    outer: function() {
+        var that = this; // &lt;==
+        function inner() {
+            console.log(that.age); // ?
+        }
+        inner();
+    }
+}
+obj.outer();
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">20</h3>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Explicitly setting the value of this</h3>
+
+                        <div class="fragment" style="margin-top: 2em; font-size: 1.5em; line-height: 1.5em;">
+                            <ul>
+                                <li>Function.prototype.<span style="color: #f90;">call</span></li>
+                                <li>Function.prototype.<span style="color: #f90;">apply</span></li>
+                            </ul>
+                        </div>
+
+                        <aside class="notes">
+                            - Instead of working around it, there are actually ways to explicitly assign a value to 'this'.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Function.prototype.<span style="color: #f90;">call</span></h3>
+
+                        <pre><code data-trim contenteditable>
+func.call(thisArg, arg1, arg2, arg3, ...)
+                        </code></pre>
+
+                        <pre class="fragment fade-in"><code data-trim contenteditable>
+var person = {
+    sayName: function() {
+        console.log(this.name);
+    }
+};
+var ceo = { name: "Mark" };
+
+person.sayName.call(ceo); // ?
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">Mark</h3>
+
+                        <aside class="notes">
+                            - 'bind' invokes a function and overrides its 'this' with the first argument. <br/>
+                            - The other arguments are passed on to the function itself.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section data-transition="none">
+                        <h3>Function.prototype.<span style="color: #f90;">call</span></h3>
+
+                        <pre><code data-trim contenteditable>
+var nodeList = document.getElementsByTagName("h2");
+var firstTwo = nodeList.slice(0, 2);
+                        </code></pre>
+
+                        <h4 class="fragment fade-in">TypeError: Object #&lt;NodeList&gt; has no method 'slice'</h4>
+
+                        <pre class="fragment fade-in"><code data-trim contenteditable style="font-size: 1.3em;">
+var firstTwo = Array.prototype.slice.call(nodeList, 0, 2);
+                        </code></pre>
+
+                        <h4 class="fragment fade-in">OK</h4>
+
+                        <aside class="notes">
+                            - Let's look at a practical use-case. <br/>
+                            - getElementsByTagName() returns an 'array-like' object. <br/>
+                            - If we wanted to obtain the first two elements from this nodeList, what would we do?
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                <section>
+                    <h3>Inheritance and <i>this</i></h3>
+
+                    <pre><code data-trim contenteditable style="font-size: 1.1em;">
+function Person(name) {
+    this.name = name;
+}
+Person.prototype.method = function() { /* ... */ }
+                    </code></pre>
+                    <pre><code data-trim contenteditable style="font-size: 1.1em;">
+function Employee(name, department) {
+    Person.call(this, name); // &lt;==
+    this.department = department;
+}
+
+Employee.prototype = new Person;
+Employee.prototype.constructor = Employee;
+
+var e = new Employee("John Doe", "Marketing");
+console.log(e.name, e.department); // ?
+                    </code></pre>
+
+                    <h3 class="fragment fade-in">John Doe &nbsp;&nbsp; Marketing</h3>
+
+                        <aside class="notes">
+                            - Another practical use-case is inheritance.
+                        </aside>
+                </section>
+
+                <!-- ------------------------------------------------ -->
+
+
+                    <section>
+                        <h3>Function.prototype.<span style="color: #f90;">apply</span></h3>
+
+                        <pre><code data-trim contenteditable>
+func.apply(thisArg, argsArray)
+                        </code></pre>
+
+                        <pre class="fragment fade-in"><code data-trim contenteditable>
+var max = Math.max(82, 12, 1, 52, 27);
+console.log(max);
+                        </code></pre>
+
+                        <h4 class="fragment fade-in">82</h4>
+
+                        <pre class="fragment fade-in"><code data-trim contenteditable>
+var numbers = [ 82, 12, 1, 52, 27 ];
+var max = Math.max.apply(null, numbers);
+console.log(max);
+                        </code></pre>
+
+                        <h4 class="fragment fade-in">82</h4>
+
+                        <aside class="notes">
+                            - apply is pretty useful in situations where a function accepts multiple individual arguments but what we have is an array.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section data-transition="none">
+                        <h3>Function.prototype.<span style="color: #f90;">apply</span></h3>
+
+                        <pre><code data-trim contenteditable style="font-size: 1.1em;">
+function maxInArray(arr) {
+    var max = -Infinity;
+    for(var i = 0; i < arr.length; i++)
+        if(arr[i] > max) max = arr[i];
+    return max;
+}
+var numbers = [ 82, 12, 1, 52, 27 ];
+console.log(maxInArray(numbers));
+                        </code></pre>
+
+                        <h4 class="fragment fade-in">82</h4>
+
+                        <pre class="fragment fade-in"><code data-trim contenteditable style="font-size: 1.2em;">
+function maxInArray(arr) {
+    return Math.max.apply(null, arr);
+}
+var numbers = [ 82, 12, 1, 52, 27 ];
+console.log(maxInArray(numbers));
+                        </code></pre>
+
+                        <h4 class="fragment fade-in">82</h4>
+                        </code></pre>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Function.prototype.<span style="color: #f90;">bind</span></h3>
+
+                        <pre class="fragment fade-in"><code data-trim contenteditable>
+func.bind(thisArg, arg1, arg2, arg3, ...)
+                        </code></pre>
+
+                        <pre class="fragment fade-in"><code data-trim contenteditable>
+var person = {
+    sayName: function() {
+        console.log(this.firstName); // ?
+    },
+    firstName: "John"
+};
+
+var func = person.sayName.bind(person); // &lt;==
+
+func();
+                        </code></pre>
+
+                        <h4 class="fragment fade-in">John</h4>
+
+                        <aside class="notes">
+                            - bind creates a new function with the same function body as the function it's called on, with the 'this' value bound to the first argument. <br/>
+                            - bind also accepts default arguments to provide to the function body when the bound function is called.
+                        </aside>
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section data-transition="none">
+                        <h3>Function.prototype.<span style="color: #f90;">bind</span></h3>
+
+                        setTimeout
+                        <pre><code data-trim contenteditable>
+var person = { 
+    firstName: "John",
+    sayName: function() {
+        setTimeout(function() {
+            console.log(this.firstName); // ?
+        }.bind(this), 1000); // &lt;==
+    }
+};
+
+person.sayName();
+                        </code></pre>
+
+                        <h4 class="fragment fade-in">John</h4>
+
+                        <aside class="notes">
+                            - Most modern browsers support 'bind' natively. For those that don't, a JavaScript polyfill is available.
+                        </aside>
+
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                    <section>
+                        <h3>Function.prototype.<span style="color: #f90;">bind</span></h3>
+
+                        <div style="text-align: left;">Original code:</div>
+                        <pre><code data-trim contenteditable>
+var log = console.log;
+
+log("Hello!"); // ?
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">TypeError: Illegal invocation</h3>
+
+                        <div class="fragment fade-in">
+                            <div style="text-align: left;">Fixed code:</div>
+                            <pre><code data-trim contenteditable>
+var log = console.log.bind(console);
+
+log("Hello!"); // ?
+                            </code></pre>
+                        </div>
+
+                        <h3 class="fragment fade-in">Hello!</h3>
+
+                    </section>
+
+                <!-- ------------------------------------------------ -->
+
+                </section>
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+                <section>
+                    <section>
+                        <h2>Weird results?</h2>
+
+                        <aside class="notes">
+                            - Let's look at some seemingly weird results
+                        </aside>
+                    </section>
+
+                    <section>
+                        <h3>Special Handling</h3>
+
+                        <div style="text-align: left;">HTML:</div>
+                        <pre><code data-trim contenteditable style="font-size: 1.3em;">
+&lt;span onclick="alert(this)"&gt;Click me&lt;/span&gt;
+
+&lt;a href="http://google.com/" onclick="alert(this)"&gt;Google&lt;/a&gt;
+                        </code></pre>
+                        <span class="button-click" onclick="alert(this)">Click me</span>
+                        <br/>
+                        <br/>
+                        <a href="http://google.com/" onclick="alert(this); return false;" style="border-bottom: 1px solid #66f; color: #66f;">Google</a>
+
+                        <h3 class="fragment fade-in" style="margin-top: 0.75em; padding: 0.75em; border-top: 1px solid #444;">.toString()</h3>
+                    </section>
+
+                    <section>
+                        <h3>eval.call</h3>
+
+                        <div style="text-align: left;">HTML:</div>
+                        <pre><code data-trim contenteditable style="font-size: 1.3em;">
+var obj = {
+    name: "John",
+    func: function() {
+        eval.call(this, "console.log(this)"); // ?
+    }
+}
+
+obj.func();
+                        </code></pre>
+
+                        <h3 class="fragment fade-in">&lt;window object&gt;</h3>
+                        <h6 class="fragment fade-in">&lt;window object&gt; (strict mode)</h6>
+                    </section>
+                </section>
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+                <section data-markdown>
+                    ##Further Reading
+
+
+                    * [Function.prototype.call](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/call) - MDN
+                    * [Function.prototype.apply](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply) - MDN
+                    * [Function.prototype.bind](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind) - MDN
+                    * [this](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this) - MDN
+                </section>
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+                <section>
+                    <h2>Q & A</h2>
+		<br/>
+		<br/>
+		<br/>
+		<h3>
+			<div style="font-size: 0.75em;">
+				<a href="https://twitter.com/zorder">@zorder</a>
+			</div>
+		</h3>
+                </section>
+
+
+            <!-- ==================================================================== -->
+            <!-- ==================================================================== -->
+
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+                mouseWheel: false,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+            Reveal.addEventListener( 'fragmentshown', function( event ) {
+                    var customBackground = event.fragment.getAttribute("data-background");
+                    if(customBackground) {
+                        event.fragment.parentNode.style.backgroundColor = customBackground;
+                    }
+                    // event.fragment = the fragment DOM element
+            } );
+
+		</script>
+
+	</body>
+</html>
