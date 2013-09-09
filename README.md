@@ -14,6 +14,7 @@ This presentation discusses common usage patterns that lead to an unexpected val
 * _this_ in setTimeout, setInterval callbacks
 * _this_ in event handlers
     * &lt;span onclick="hander()"&gt;
+    * &lt;span onclick="hander(this)"&gt;
     * &lt;span onclick="handler"&gt; 
     * element.onclick = handler; 
     * element.addEventListener("click", handler);
