@@ -6,7 +6,7 @@ The _this_ keyword in JavaScript can get quite tricky, especially in event callb
 
 This presentation discusses common usage patterns that lead to an incorrect context (i.e. an unexpected value of _this_), as well as provides recipes to code these patterns the right way.
 
-Outline:
+### Outline
 
 * _this_ in Object methods, getters & setters
 * _this_ in Function calls
