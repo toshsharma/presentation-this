@@ -1390,7 +1390,7 @@ obj.func();
             index = event.indexh;
         if(event.indexv > 0)
             index += ("/" + event.indexv);
-        _gaq.push(['_trackPageview', location.pathname + location.search  + "#/" + index]);
+        ga('send', 'pageview', location.pathname + location.search  + "#/" + index);
     } );
 </script>
 
