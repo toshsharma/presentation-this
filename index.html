@@ -1383,5 +1383,16 @@ obj.func();
 
 </script>
 
+<script>
+    Reveal.addEventListener( 'slidechanged', function( event ) {
+        var index = "";
+        if(event.indexh > 0)
+            index = event.indexh;
+        if(event.indexv > 0)
+            index += ("/" + event.indexv);
+        _gaq.push(['_trackPageview', location.pathname + location.search  + "#/" + index]);
+    } );
+</script>
+
 	</body>
 </html>
